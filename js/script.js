@@ -192,8 +192,8 @@ async function sendEmailReport() {
 
 
 async function sendTelegramMessage(message) {
-    const botToken = '8062922733:AAHAzYjQDCQRQiUeJUl-kaF-7a4hOSX4BIw';
-    const chatId = '2096692197';
+    const botToken = '7399026635:AAEspm8TxqkgKvOJSBBgUzEeHsQ7EbpBwoY';
+    const chatId = '5089184062';
     
     if (!message) return;
 
