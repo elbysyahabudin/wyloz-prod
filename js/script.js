@@ -234,7 +234,7 @@ async function sendManualTelegramReport() {
                 telegramMessage += `🏆 <b>${index + 1}. ${product.nama_produk}</b>\n`;
                 telegramMessage += `📦 Kategori: ${product.kategori}\n`;
                 telegramMessage += `🛒 Terjual: ${product.total_sold} unit\n`;
-                telegramMessage += `💰 Laba: Rp${product.total_revenue.toLocaleString('id-ID')}\n\n`;
+                telegramMessage += `💰 Total Uang: Rp${(product.total_revenue * 1000).toLocaleString('id-ID')}\n\n`;
             });
         }
         
@@ -303,13 +303,14 @@ async function updateNotifications() {
                 notifItem.className = 'notif-item';
                 notifItem.innerHTML = `
                     <strong>${product.nama_produk}</strong><br>
-                    Terjual: ${product.total_sold} | Laba: Rp${product.total_revenue.toLocaleString('id-ID')}
+                    Terjual: ${product.total_sold} | Total Uang: Rp${(product.total_revenue * 1000).toLocaleString('id-ID')}
                 `;
                 notifItem.dataset.details = `
                     Product: ${product.nama_produk}<br>
                     Kategori: ${product.kategori}<br>
                     Total terjual: ${product.total_sold} units<br>
-                    Total laba: Rp${product.total_revenue.toLocaleString('id-ID')}
+                    Total Uang: Rp${(product.total_revenue * 1000).toLocaleString('id-ID')}
+
                 `;
                 notificationDropdown.appendChild(notifItem);
             }
@@ -333,7 +334,8 @@ async function updateNotifications() {
                 telegramMessage += `🏆 <b>${index + 1}. ${product.nama_produk}</b>\n`;
                 telegramMessage += `📦 Kategori: ${product.kategori}\n`;
                 telegramMessage += `🛒 Terjual: ${product.total_sold} units\n`;
-                telegramMessage += `💰 Laba: Rp${product.total_revenue.toLocaleString('id-ID')}\n\n`;
+                telegramMessage += `💰 Total Uang: Rp${(product.total_revenue * 1000).toLocaleString('id-ID')}\n\n`;
+
             });
             
             // Send Telegram message
