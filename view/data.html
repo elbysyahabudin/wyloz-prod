@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Transaksi | Dashboard</title>
+    <link rel="icon" href="../assets/wyloz-logo.PNG" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/data.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="logo">Wyloz</h2>
+        </div>
+        <div class="sidebar-menu">
+            <!-- <a href="../view/index.html" class="menu-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a> -->
+            <a href="../view/analytic.html" class="menu-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Dashboard Analitik</span>
+            </a>
+            <a href="../view/data.html" class="menu-item active">
+                <i class="fas fa-database"></i>
+                <span>Data Transaksi</span>
+            </a>
+            <a href="../view/cms.html" class="menu-item">
+                <i class="fas fa-tools"></i>
+                <span>Masukkan Data</span>
+            </a>
+        </div>
+    </div>
+
+
+    <!-- Top Navbar -->
+    <div class="top-navbar">
+        <div class="burger-menu" id="burgerMenu">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="nav-right">
+            <div class="notification-icon" id="notificationIcon">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notificationBadge">3</span>
+                <div class="notification-dropdown" id="notificationDropdown">
+                    <p class="notif-item" data-details="New user John Doe registered on 2023-07-15">New user registered</p>
+                    <p class="notif-item" data-details="Version 2.5.0 is available for download">System update available</p>
+                    <p class="notif-item" data-details="Messages from Support, Marketing, and Sales">3 unread messages</p>
+                </div>
+            </div>
+            <div class="profile-icon">
+                <img src="../assets/wyloz-logo.PNG" alt="Wyloz" class="profile-img">
+            </div>
+            <div class="profile-dropdown" id="profileDropdown">
+                <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="page active">
+            <h2>Data Transaksi</h2>
+            
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="category-filter">Kategori</label>
+                        <select id="category-filter">
+                            <option value="">Semua Kategori</option>
+                            <option value="Tops">Tops</option>
+                            <option value="Shirt">Kaos</option>
+                            <option value="Celana">Celana</option>
+                            <option value="Jacket">Jaket</option>
+                            <option value="Bag">Tas</option>
+                            <option value="Shoe">Sepatu</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="courier-filter">Kurir</label>
+                        <select id="courier-filter">
+                            <option value="">Semua Kurir</option>
+                            <option value="AnterAja">AnterAja</option>
+                            <option value="JNE">JNE</option>
+                            <option value="J&T">J&T</option>
+                            <option value="SiCepat">SiCepat</option>
+                            <option value="TiKi">TiKi</option>
+                            <option value="Wahana">Wahana</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="payment-filter">Pembayaran</label>
+                        <select id="payment-filter">
+                            <option value="">Semua Pembayaran</option>
+                            <option value="Transfer">Transfer Bank</option>
+                            <option value="Jago">Bank Jago</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Dana">Dana</option>
+                            <option value="GoPay">GoPay</option>
+                            <option value="LinkAja">LinkAja</option>
+                            <option value="Ovo">Ovo</option>
+                            <option value="ShopeePay">ShopeePay</option>  
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="province-filter">Provinsi</label>
+                        <select id="province-filter">
+                            <option value="">Pilih Provinsi</option>
+                            <option value="aceh">Aceh</option>
+                            <option value="north sumatera">Sumatera Utara</option>
+                            <option value="west sumatera">Sumatera Barat</option>
+                            <option value="riau">Riau</option>
+                            <option value="riau">Kepulauan Riau</option>
+                            <option value="jambi">Jambi</option>
+                            <option value="south sumatera">South Sumatera</option>
+                            <option value="bengkulu">Bengkulu</option>
+                            <option value="lampung">Lampung</option>
+                            <option value="bangka belitung">Kepulauan Bangka Belitung</option>
+                            <option value="jakarta">DKI Jakarta</option>
+                            <option value="west java">Jawa Barat</option>
+                            <option value="banten">Banten</option>
+                            <option value="central java">Jawa Tengah</option>
+                            <option value="yogyakarta">DI Yogyakarta</option>
+                            <option value="east jawa">Jawa Timur</option>
+                            <option value="bali">Bali</option>
+                            <option value="nusa-tenggara-barat">Nusa Tenggara Barat</option>
+                            <option value="nusa-tenggara-timur">Nusa Tenggara Timur</option>
+                            <option value="west kalimantan">Kalimantan Barat</option>
+                            <option value="central kalimantan">Kalimantan Tengah</option>
+                            <option value="south kalimantan">Kalimantan Selatan</option>
+                            <option value="east kalimantan">Kalimantan Timur</option>
+                            <option value="north kalimantan">Kalimantan Utara</option>
+                            <option value="north sulawesi">Sulawesi Utara</option>
+                            <option value="central sulawesi">Sulawesi Tengah</option>
+                            <option value="south sulawesi">Sulawesi Selatan</option>
+                            <option value="sulawesi-tenggara">Sulawesi Tenggara</option>
+                            <option value="gorontalo">Gorontalo</option>
+                            <option value="west sulawesi">Sulawesi Barat</option>
+                            <option value="maluku">Maluku</option>
+                            <option value="north maluku">Maluku Utara</option>
+                            <option value="papua">Papua</option>
+                            <option value="west papua">Papua Barat</option>
+                            <option value="south papua">Papua Selatan</option>
+                            <option value="papua-pegunungan">Papua Pegunungan</option>
+                            <option value="central papua">Papua Tengah</option>
+                            <option value="southwest papua">Papua Barat Daya</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="date-filter">Tanggal Pembelian</label>
+                        <input type="text" id="date-filter" placeholder="Pilih tanggal">
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button class="print-btn" id="print-btn">
+                        <i class="fas fa-print"></i> Cetak PDF
+                    </button>
+                    <button class="reset-btn" id="reset-filters">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button class="apply-btn" id="apply-filters">
+                        <i class="fas fa-filter"></i> Terapkan Filter
+                    </button>
+                    <button class="delete-selected-btn" id="delete-selected-btn">
+                        <i class="fas fa-trash-alt"></i> Hapus Data Terpilih
+                    </button>
+                    <button class="delete-all-btn" id="delete-all-btn">
+                        <i class="fas fa-trash-alt"></i> Hapus Semua Data
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Table Section -->
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th>No</th>
+                            <th>Nama Pelanggan</th>
+                            <th>Nama Produk</th>
+                            <th>Kuantitas</th>
+                            <th>Kategori</th>
+                            <th>Metode Pengiriman</th>
+                            <th>Metode Pembayaran</th>
+                            <th>Kurir</th>
+                            <th>Kota Pelanggan</th>
+                            <th>Provinsi</th>
+                            <th>Tanggal Pembelian</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination Section -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be added by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Data Transaksi</h3>
+                <button class="close-btn" id="closeEditModal">&times;</button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label for="editCustomerName">Nama Pelanggan</label>
+                    <input type="text" id="editCustomerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editProductName">Nama Produk</label>
+                    <input type="text" id="editProductName" required>
+                </div>
+                <div class="form-group">
+                    <label for="editQuantity">Kuantitas</label>
+                    <input type="number" id="editQuantity" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCategory">Kategori</label>
+                    <select id="editCategory" required>
+                        <option value="Tops">Tops</option>
+                        <option value="Kaos">Kaos</option>
+                        <option value="Celana">Celana</option>
+                        <option value="Jaket">Jaket</option>
+                        <option value="Tas">Tas</option>
+                        <option value="Sepatu">Sepatu</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editShippingMethod">Metode Pengiriman</label>
+                    <select id="editShippingMethod" required>
+                        <option value="COD">COD</option>
+                        <option value="Kurir">Kurir</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editPaymentMethod">Metode Pembayaran</label>
+                    <select id="editPaymentMethod" required>
+                        <option value="Transfer">Transfer Bank</option>
+                        <option value="Jago">Bank Jago</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Dana">Dana</option>
+                        <option value="GoPay">GoPay</option>
+                        <option value="LinkAja">LinkAja</option>
+                        <option value="Ovo">Ovo</option>
+                        <option value="ShopeePay">ShopeePay</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editCourier">Kurir</label>
+                    <select id="editCourier" required>
+                        <option value="AnterAja">AnterAja</option>
+                        <option value="JNE">JNE</option>
+                        <option value="J&T">J&T</option>
+                        <option value="SiCepat">SiCepat</option>
+                        <option value="TiKi">TiKi</option>
+                        <option value="Wahana">Wahana</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerCity">Kota Pelanggan</label>
+                    <input type="text" id="editCustomerCity" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCustomerProvince">Provinsi</label>
+                    <select id="editCustomerProvince">
+                        <option value="">Pilih Provinsi</option>
+                        <option value="aceh">Aceh</option>
+                        <option value="sumatera-utara">Sumatera Utara</option>
+                        <option value="sumatera-barat">Sumatera Barat</option>
+                        <option value="riau">Riau</option>
+                        <option value="kepulauan-riau">Kepulauan Riau</option>
+                        <option value="jambi">Jambi</option>
+                        <option value="sumatera-selatan">Sumatera Selatan</option>
+                        <option value="bengkulu">Bengkulu</option>
+                        <option value="lampung">Lampung</option>
+                        <option value="kepulauan-bangka-belitung">Kepulauan Bangka Belitung</option>
+                        <option value="dki-jakarta">DKI Jakarta</option>
+                        <option value="jawa-barat">Jawa Barat</option>
+                        <option value="banten">Banten</option>
+                        <option value="jawa-tengah">Jawa Tengah</option>
+                        <option value="diy-yogyakarta">DI Yogyakarta</option>
+                        <option value="jawa-timur">Jawa Timur</option>
+                        <option value="bali">Bali</option>
+                        <option value="nusa-tenggara-barat">Nusa Tenggara Barat</option>
+                        <option value="nusa-tenggara-timur">Nusa Tenggara Timur</option>
+                        <option value="kalimantan-barat">Kalimantan Barat</option>
+                        <option value="kalimantan-tengah">Kalimantan Tengah</option>
+                        <option value="kalimantan-selatan">Kalimantan Selatan</option>
+                        <option value="kalimantan-timur">Kalimantan Timur</option>
+                        <option value="kalimantan-utara">Kalimantan Utara</option>
+                        <option value="sulawesi-utara">Sulawesi Utara</option>
+                        <option value="sulawesi-tengah">Sulawesi Tengah</option>
+                        <option value="sulawesi-selatan">Sulawesi Selatan</option>
+                        <option value="sulawesi-tenggara">Sulawesi Tenggara</option>
+                        <option value="gorontalo">Gorontalo</option>
+                        <option value="sulawesi-barat">Sulawesi Barat</option>
+                        <option value="maluku">Maluku</option>
+                        <option value="maluku-utara">Maluku Utara</option>
+                        <option value="papua">Papua</option>
+                        <option value="papua-barat">Papua Barat</option>
+                        <option value="papua-selatan">Papua Selatan</option>
+                        <option value="papua-pegunungan">Papua Pegunungan</option>
+                        <option value="papua-tengah">Papua Tengah</option>
+                        <option value="papua-barat-daya">Papua Barat Daya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editPurchaseDate">Tanggal Pembelian</label>
+                    <input type="text" id="editPurchaseDate" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancel-btn" id="cancelEdit">Batal</button>
+                    <button type="submit" class="save-btn">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Konfirmasi Hapus Data</h3>
+                <button class="close-btn" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" id="cancelDelete">Batal</button>
+                <button type="button" class="confirm-btn" id="confirmDelete">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="notificationModal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="modalTitle">Notification Detail</h3>
+            <p id="modalContent">This is the notification content.</p>
+        </div>
+    </div>
+
+    <!-- Delete All Confirmation Modal -->
+    <div class="modal" id="deleteAllModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Konfirmasi Hapus Semua Data</h3>
+                <button class="close-btn" id="closeDeleteAllModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus SEMUA data transaksi? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data secara permanen.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" id="cancelDeleteAll">Batal</button>
+                <button type="button" class="confirm-btn" id="confirmDeleteAll">Hapus Semua</button>
+            </div>
+        </div>
+    </div>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+    <script src="../js/script.js"></script>
+    <script src="../js/simple-auth.js"></script>
+    <script src="../js/data.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

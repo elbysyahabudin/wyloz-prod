@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="icon" href="../assets/wyloz-logo.PNG" type="image/png">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="../css/login.css">
+
+</head>
+<body>
+    <div class="bg-slideshow">
+    <!-- Images will be inserted here by JavaScript -->
+</div>
+    <div class="login-card">
+        <div class="left-content">
+            <img src="../assets/wyloz-logo.PNG" alt="Wyloz Logo">
+            <h2>Wyloz</h2>
+        </div>
+        <div class="right-content">
+            <input type="text" id="email" placeholder="Email">
+            <div id="email-error" class="error-message">Harap isi email</div>
+
+            <input type="password" id="password" placeholder="Password">
+            <div id="password-error" class="error-message">Harap isi kata sandi</div>
+
+            <button onclick="login()">Masuk</button>
+            
+            <div id="g_id_onload"
+                 data-client_id="1046052573504-3f0ug0rus1t7dd8k84ckh06lslg36h1j.apps.googleusercontent.com"
+                 data-callback="handleCredentialResponse"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 >
+            </div>
+            
+            <div class="g_id_signin" 
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="filled_blue"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left">
+            </div>
+            
+            <!-- <div class="register-link">
+                Belum punya akun? <a href="../view/register.html">Daftar</a>
+            </div> -->
+        </div>
+    </div>
+
+    <script src="../js/login.js"></script>
+    <!-- <script src="../js/simple-auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth(); 
+        });
+    </script> -->
+</body>
+</html>

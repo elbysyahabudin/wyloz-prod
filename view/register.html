@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daftar</title>
+  <link rel="icon" href="../assets/wyloz-logo.PNG" type="image/png">
+  <link rel="stylesheet" href="../css/register.css">
+
+</head>
+<body>
+  <div class="register-card">
+    <div class="left-content">
+      <img src="../assets/wyloz-logo.PNG" alt="Wyloz Logo" />
+      <h2>Wyloz</h2>
+    </div>
+    <div class="right-content">
+      <input type="text" id="name" placeholder="Username" required />
+      <div id="name-error" class="error-message">Harap is nama pengguna</div>
+
+      <input type="email" id="email" placeholder="Email" required />
+      <div id="email-error" class="error-message">Harap isi email</div>
+
+      <input type="password" id="password" placeholder="Password" required />
+      <div id="password-error" class="error-message">Password harus lebih dari 6 karakter</div>
+
+      <button onclick="register()">Daftar</button>
+      <div class="login-link">
+        Sudah punya akun? <a href="../view/login.html">Masuk</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+
+  <script src="../js/register.js"></script>
+</body>
+</html>
