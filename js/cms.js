@@ -1,8 +1,8 @@
-
 const supabaseClient = supabase.createClient(
-    'https://trqvushwhkvchkgqhmge.supabase.co', // 🔁 Replace with your Supabase project URL
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycXZ1c2h3aGt2Y2hrZ3FobWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MDU1MjUsImV4cCI6MjA1MzQ4MTUyNX0.J-yggfqvHPQtP-Zk-bwOxTRqD64J6jgQ_DOLCCp-JxY' // 🔁 Replace with your public anon key
+    'https://trqvushwhkvchkgqhmge.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycXZ1c2h3aGt2Y2hrZ3FobWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MDU1MjUsImV4cCI6MjA1MzQ4MTUyNX0.J-yggfqvHPQtP-Zk-bwOxTRqD64J6jgQ_DOLCCp-JxY'
 );
+
 // Show selected file name
 document.getElementById('fileInput').addEventListener('change', function(e) {
     const fileName = e.target.files.length ? e.target.files[0].name : 'No file chosen';
@@ -66,13 +66,13 @@ function createErrorElements() {
             errorSpan.style.color = 'red';
             errorSpan.style.fontSize = '0.8em';
             errorSpan.style.marginTop = '5px';
-            errorSpan.style.display = 'none'; // Hidden by default
+            errorSpan.style.display = 'none';
             inputGroup.appendChild(errorSpan);
         }
     });
 }
 
-// Validate a single field (but don't show error yet)
+// Validate a single field
 function validateField(field) {
     return field.value.trim() !== '';
 }
@@ -147,7 +147,6 @@ document.querySelector('.submit-btn').addEventListener('click', async function (
 
         if (error) throw error;
 
-        // Show success alert
         Swal.fire({
             title: 'Success!',
             text: 'Data telah tersimpan',
@@ -156,7 +155,6 @@ document.querySelector('.submit-btn').addEventListener('click', async function (
             timer: 3000,
             timerProgressBar: true
         }).then(() => {
-            // Redirect to data.html after alert is closed
             window.location.href = 'data.html';
         });
 
@@ -180,253 +178,219 @@ document.querySelector('.submit-btn').addEventListener('click', async function (
         submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Submit';
     }
 });
-// Excel import functionality
-// Replace the existing importBtn event listener with this improved version
+
+// Optimized Excel import functionality
 document.getElementById('importBtn').addEventListener('click', async function() {
-const fileInput = document.getElementById('fileInput');
-const file = fileInput.files[0];
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
 
-if (!file) {
-// alert('Please select an Excel file first');
-return;
-}
-
-// Show progress container
-const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progressBar');
-const progressText = document.getElementById('progressText');
-const successMessage = document.getElementById('successMessage');
-const errorMessage = document.getElementById('errorMessage');
-
-progressContainer.style.display = 'block';
-successMessage.style.display = 'none';
-errorMessage.style.display = 'none';
-
-// Disable import button during processing
-const importBtn = document.getElementById('importBtn');
-importBtn.disabled = true;
-importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-
-try {
-// Read the Excel file
-const data = await readExcelFile(file);
-
-if (!data || data.length === 0) {
-    throw new Error('No data found in the Excel file');
-}
-
-// Process the data in batches
-const batchSize = 5;
-const totalRecords = data.length;
-let processedRecords = 0;
-let successfulImports = 0;
-const failedRecords = [];
-
-// Update progress
-function updateProgress() {
-    const percent = Math.round((processedRecords / totalRecords) * 100);
-    progressBar.style.width = `${percent}%`;
-    progressText.textContent = `Memproses: ${percent}% (${processedRecords}/${totalRecords} data)`;
-}
-
-// Process in batches
-for (let i = 0; i < totalRecords; i += batchSize) {
-    const batch = data.slice(i, i + batchSize);
-    
-    // Process each record in the batch
-    for (const [index, record] of batch.entries()) {
-        const recordNumber = i + index + 1;
-        try {
-            console.log(`Processing record ${recordNumber}:`, record);
-            
-            // Validate required fields
-            if (!record.nama_pelanggan || !record.nama_produk || !record.harga) {
-                throw new Error('Missing required fields');
-            }
-            
-            // Ensure harga is a number
-            if (isNaN(record.harga)) {
-                throw new Error('Invalid price value');
-            }
-            
-            // Use Supabase only (removed fetch code)
-            const { error } = await supabaseClient
-                .from('tabel_produk')
-                .insert([record]);
-
-            if (error) {
-                throw new Error(error.message);
-            }
-            
-            successfulImports++;
-        } catch (error) {
-            console.error(`Error importing record ${recordNumber}:`, error);
-            failedRecords.push({
-                recordNumber,
-                error: error.message,
-                data: record
-            });
-        } finally {
-            processedRecords++;
-            updateProgress();
-        }
+    if (!file) {
+        return;
     }
-    
-    // Small delay between batches to avoid overwhelming the server
-    await new Promise(resolve => setTimeout(resolve, 500));
-}
 
-// Show results
-if (failedRecords.length === 0) {
-    successMessage.textContent = `Berhasil memasukkan ${totalRecords} data`;
-    successMessage.style.display = 'block';
-} else {
-    successMessage.textContent = `Berhasil memasukkan ${successfulImports} dari ${totalRecords} data`;
-    successMessage.style.display = 'block';
-    
-    errorMessage.innerHTML = `
-        <strong>${failedRecords.length} records failed to import:</strong>
-        <ul>
-            ${failedRecords.slice(0, 5).map(f => 
-                `<li>Record ${f.recordNumber}: ${f.error}</li>`
-            ).join('')}
-        </ul>
-        ${failedRecords.length > 5 ? `<p>...and ${failedRecords.length - 5} more failures</p>` : ''}
-        <p>Check browser console for complete error details.</p>
-    `;
-    errorMessage.style.display = 'block';
-}
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const successMessage = document.getElementById('successMessage');
+    const errorMessage = document.getElementById('errorMessage');
 
-} catch (error) {
-console.error('Error processing Excel file:', error);
-errorMessage.textContent = `Error: ${error.message}`;
-errorMessage.style.display = 'block';
-} finally {
-importBtn.disabled = false;
-importBtn.innerHTML = '<i class="fas fa-file-import"></i> Masukkan Data';
-}
-});
-// Function to read Excel file and map to our data structure
-async function readExcelFile(file) {
-return new Promise((resolve, reject) => {
-const reader = new FileReader();
+    progressContainer.style.display = 'block';
+    successMessage.style.display = 'none';
+    errorMessage.style.display = 'none';
 
-reader.onload = function(e) {
+    const importBtn = document.getElementById('importBtn');
+    importBtn.disabled = true;
+    importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
     try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        
-        // Get the first sheet
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Convert to JSON
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        
-        if (!jsonData || jsonData.length === 0) {
-            reject(new Error('No data found in the Excel sheet'));
-            return;
+        const data = await readExcelFile(file);
+
+        if (!data || data.length === 0) {
+            throw new Error('No data found in the Excel file');
         }
-        
-        // Map the Excel data to our data structure
-        const mappedData = jsonData.map(row => {
-            // Initialize the result object
-            const result = {
-                nama_pelanggan: '',
-                nama_produk: '',
-                harga: 0,
-                kuantitas: 1,
-                kategori: '',
-                pengiriman: 'kurir',
-                metode_pembayaran: '',
-                kurir: '',
-                kota_pelanggan: '',
-                provinsi: '',
-                tanggal_pembelian: ''
-            };
-            
-            // Map each field with better date handling
-            for (const key in row) {
-                const value = row[key];
-                
-                // Skip empty values
-                if (value === undefined || value === null || value === '') continue;
-                
-                // Determine the field based on header name
-                if (key.includes('Product Name')) {
-                    // Limit to 4 words
-                    const fullName = String(value);
-                    result.nama_produk = fullName.split(' ').slice(0, 4).join(' ');
-                } else if (key.includes('Quantity')) {
-                    result.kuantitas = parseInt(value) || 1;
-                } else if (key.includes('SKU Unit Original Price')) {
-                    // Handle various price formats
-                    const price = String(value).replace(/[^\d.]/g, '');
-                    result.harga = parseFloat(price) * 1000|| 0;
-                } else if (key.includes('Created Time') || key.includes('Tanggal')) {
-                    result.tanggal_pembelian = convertExcelDate(value);
-                } else if (key.includes('Shipping Provider Name')) {
-                    result.kurir = String(value);
-                } else if (key.includes('Buyer Username')) {
-                    result.nama_pelanggan = String(value);
-                } else if (key.includes('Province')) {
-                    result.provinsi = String(value);
-                } else if (key.includes('Regency and City')) {
-                    result.kota_pelanggan = String(value);
-                } else if (key.includes('Payment Method')) {
-                    result.metode_pembayaran = String(value);
-                } else if (key.includes('Product Category')) {
-                    result.kategori = String(value);
-                }
+
+        const batchSize = 50; // Increased batch size for faster processing
+        const totalRecords = data.length;
+        let processedRecords = 0;
+        let successfulImports = 0;
+        const failedRecords = [];
+
+        function updateProgress() {
+            const percent = Math.round((processedRecords / totalRecords) * 100);
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `Memproses: ${percent}% (${processedRecords}/${totalRecords} data)`;
+        }
+
+        // Process in batches with bulk inserts
+        for (let i = 0; i < totalRecords; i += batchSize) {
+            const batch = data.slice(i, i + batchSize).filter(record => 
+                record.nama_pelanggan && record.nama_produk && !isNaN(record.harga)
+            );
+
+            if (batch.length === 0) {
+                processedRecords += batchSize;
+                updateProgress();
+                continue;
             }
+
+            try {
+                const { error } = await supabaseClient
+                    .from('tabel_produk')
+                    .insert(batch);
+
+                if (error) {
+                    throw new Error(error.message);
+                }
+
+                successfulImports += batch.length;
+            } catch (error) {
+                console.error(`Error importing batch ${i/batchSize + 1}:`, error);
+                batch.forEach((record, index) => {
+                    failedRecords.push({
+                        recordNumber: i + index + 1,
+                        error: error.message,
+                        data: record
+                    });
+                });
+            } finally {
+                processedRecords += batch.length;
+                updateProgress();
+            }
+
+            // Minimal delay to prevent server overload
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        if (failedRecords.length === 0) {
+            successMessage.textContent = `Berhasil memasukkan ${totalRecords} data`;
+            successMessage.style.display = 'block';
+        } else {
+            successMessage.textContent = `Berhasil memasukkan ${successfulImports} dari ${totalRecords} data`;
+            successMessage.style.display = 'block';
             
-            return result;
-        }).filter(item => 
-            item.nama_pelanggan && item.nama_produk && item.harga > 0
-        );
-        
-        resolve(mappedData);
+            errorMessage.innerHTML = `
+                <strong>${failedRecords.length} records failed to import:</strong>
+                <ul>
+                    ${failedRecords.slice(0, 5).map(f => 
+                        `<li>Record ${f.recordNumber}: ${f.error}</li>`
+                    ).join('')}
+                </ul>
+                ${failedRecords.length > 5 ? `<p>...and ${failedRecords.length - 5} more failures</p>` : ''}
+                <p>Check browser console for complete error details.</p>
+            `;
+            errorMessage.style.display = 'block';
+        }
     } catch (error) {
-        reject(error);
+        console.error('Error processing Excel file:', error);
+        errorMessage.textContent = `Error: ${error.message}`;
+        errorMessage.style.display = 'block';
+    } finally {
+        importBtn.disabled = false;
+        importBtn.innerHTML = '<i class="fas fa-file-import"></i> Masukkan Data';
     }
-};
-
-reader.onerror = function() {
-    reject(new Error('Error reading the file'));
-};
-
-reader.readAsArrayBuffer(file);
 });
+
+// Optimized function to read Excel file and map to data structure
+async function readExcelFile(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                if (!jsonData || jsonData.length === 0) {
+                    reject(new Error('No data found in the Excel sheet'));
+                    return;
+                }
+
+                const mappedData = jsonData.map(row => {
+                    const result = {
+                        nama_pelanggan: '',
+                        nama_produk: '',
+                        harga: 0,
+                        kuantitas: 1,
+                        kategori: '',
+                        pengiriman: 'kurir',
+                        metode_pembayaran: '',
+                        kurir: '',
+                        kota_pelanggan: '',
+                        provinsi: '',
+                        tanggal_pembelian: ''
+                    };
+
+                    for (const key in row) {
+                        const value = row[key];
+                        if (value === undefined || value === null || value === '') continue;
+
+                        if (key.includes('Product Name')) {
+                            result.nama_produk = String(value).split(' ').slice(0, 4).join(' ');
+                        } else if (key.includes('Quantity')) {
+                            result.kuantitas = parseInt(value) || 1;
+                        } else if (key.includes('SKU Unit Original Price')) {
+                            result.harga = parseFloat(String(value).replace(/[^\d.]/g, '')) * 1000 || 0;
+                        } else if (key.includes('Created Time') || key.includes('Tanggal')) {
+                            result.tanggal_pembelian = convertExcelDate(value);
+                        } else if (key.includes('Shipping Provider Name')) {
+                            result.kurir = String(value);
+                        } else if (key.includes('Buyer Username')) {
+                            result.nama_pelanggan = String(value);
+                        } else if (key.includes('Province')) {
+                            result.provinsi = String(value);
+                        } else if (key.includes('Regency and City')) {
+                            result.kota_pelanggan = String(value);
+                        } else if (key.includes('Payment Method')) {
+                            result.metode_pembayaran = String(value);
+                        } else if (key.includes('Product Category')) {
+                            result.kategori = String(value);
+                        }
+                    }
+
+                    return result;
+                }).filter(item => 
+                    item.nama_pelanggan && item.nama_produk && item.harga > 0
+                );
+
+                resolve(mappedData);
+            } catch (error) {
+                reject(error);
+            }
+        };
+
+        reader.onerror = function() {
+            reject(new Error('Error reading the file'));
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
 }
+
 // Helper function to convert various date formats to YYYY-MM-DD
 function convertExcelDate(dateValue) {
-// If it's already a Date object (from Excel)
-if (dateValue instanceof Date) {
-return dateValue.toISOString().split('T')[0];
+    if (dateValue instanceof Date) {
+        return dateValue.toISOString().split('T')[0];
+    }
+
+    if (typeof dateValue === 'string') {
+        const datePart = dateValue.split(' ')[0];
+        const parts = datePart.split('/');
+
+        if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+    }
+
+    return dateValue;
 }
 
-// If it's a string in DD/MM/YYYY format
-if (typeof dateValue === 'string') {
-// Handle dates with time component like "31/03/2024 21:17:47"
-const datePart = dateValue.split(' ')[0];
-const parts = datePart.split('/');
-
-// Check if it's DD/MM/YYYY format
-if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-    return `${parts[2]}-${parts[1]}-${parts[0]}`; // Convert to YYYY-MM-DD
-}
-
-// Handle other formats if needed
-}
-
-// Fallback - return as-is (will likely cause server error)
-return dateValue;
-}
 // Initialize error elements when page loads
 document.addEventListener('DOMContentLoaded', createErrorElements);
 
-
-
+// Autocomplete functionality
 document.addEventListener('DOMContentLoaded', function () {
     const productNameInput = document.getElementById('input2');
     const priceInput = document.getElementById('input3');
@@ -467,7 +431,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 datalist.appendChild(option);
             });
 
-            // Immediately check and update price if the input matches exactly
             updatePrice(this.value);
         });
 
@@ -477,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function () {
             );
 
             if (selectedProduct) {
-                priceInput.value = selectedProduct.harga;
+                priceInput.value = formatNumber(selectedProduct.harga.toString());
             } else {
                 priceInput.value = '';
             }

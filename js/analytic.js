@@ -25,7 +25,90 @@ document.addEventListener('DOMContentLoaded', async function () {
         updateCategoryChart(products);
         updateShippingChart(products);
         updatePaymentChart(products);
+         updateTopAndLeastProducts(products);
     }
+
+    function updateTopAndLeastProducts(products) {
+    const productSales = {};
+    
+    // Calculate sales for each product
+    products.forEach(product => {
+        if (!productSales[product.nama_produk]) {
+            productSales[product.nama_produk] = {
+                name: product.nama_produk,
+                category: product.kategori,
+                quantity: 0,
+                revenue: 0
+            };
+        }
+        productSales[product.nama_produk].quantity += parseInt(product.kuantitas);
+        productSales[product.nama_produk].revenue += parseFloat(product.harga) * parseInt(product.kuantitas);
+    });
+
+    // Convert to array and sort by quantity only
+    const productArray = Object.values(productSales);
+    const sortedByQuantity = [...productArray].sort((a, b) => b.quantity - a.quantity);
+
+    // Get top and least 3 products by quantity
+    const topProductsByQuantity = sortedByQuantity.slice(0, 3);
+    const leastProductsByQuantity = sortedByQuantity.slice(-3).reverse();
+
+    // Create HTML for the cards (quantity only)
+    const topProductsHTML = createProductTableHTML('Produk Terlaris', topProductsByQuantity, 'quantity');
+    const leastProductsHTML = createProductTableHTML('Produk Kurang Diminati', leastProductsByQuantity, 'quantity');
+
+    // Create a new card container
+    const newCard = document.createElement('div');
+    newCard.className = 'card full-width-card';
+    newCard.innerHTML = `
+        <div class="card-header">
+            <div class="card-title">Performa Produk</div>
+        </div>
+        <div class="product-performance-container">
+            ${topProductsHTML}
+            ${leastProductsHTML}
+        </div>
+    `;
+    
+    // Find the container where we want to insert the new card
+    const mainContent = document.querySelector('.main-content .page.active');
+    
+    // Create a new card-container div for our card
+    const newCardContainer = document.createElement('div');
+    newCardContainer.className = 'card-container';
+    newCardContainer.appendChild(newCard);
+    
+    // Insert after the monthly sales chart container
+    const monthlySalesContainer = document.querySelector('.card-container:nth-of-type(3)');
+    monthlySalesContainer.parentNode.insertBefore(newCardContainer, monthlySalesContainer.nextSibling);
+}
+
+    // Helper function to create HTML for product tables
+    function createProductTableHTML(title, products, type) {
+    return `
+        <div class="product-performance-table">
+            <h4>${title}</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produk</th>
+                        <th>Kategori</th>
+                        <th>Kuantitas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${products.map(product => `
+                        <tr>
+                            <td>${product.name}</td>
+                            <td>${product.category}</td>
+                            <td>${product.quantity}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
 
     function updateSummaryCards(products) {
         const totalProducts = products.reduce((sum, product) => sum + parseInt(product.kuantitas), 0);
@@ -260,3 +343,4 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 });
+

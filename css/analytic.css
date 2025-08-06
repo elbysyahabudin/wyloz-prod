@@ -51,3 +51,46 @@
     position: relative;
     height: 250px;
 }
+
+/* Product Performance Styles */
+.product-performance-container {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+}
+
+.product-performance-table {
+    flex: 1;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 15px;
+}
+
+.product-performance-table h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 16px;
+}
+
+.product-performance-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.product-performance-table th, 
+.product-performance-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.product-performance-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+.product-performance-table tr:hover {
+    background-color: #f9f9f9;
+}
