@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', async function () {
     // Initialize Supabase client
     const supabaseClient = supabase.createClient(
-        'https://trqvushwhkvchkgqhmge.supabase.co', // 🔁 Replace with your Supabase project URL
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycXZ1c2h3aGt2Y2hrZ3FobWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MDU1MjUsImV4cCI6MjA1MzQ4MTUyNX0.J-yggfqvHPQtP-Zk-bwOxTRqD64J6jgQ_DOLCCp-JxY' // 🔁 Replace with your public anon key
+        'https://trqvushwhkvchkgqhmge.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycXZ1c2h3aGt2Y2hrZ3FobWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc5MDU1MjUsImV4cCI6MjA1MzQ4MTUyNX0.J-yggfqvHPQtP-Zk-bwOxTRqD64J6jgQ_DOLCCp-JxY'
     );
 
     // Fetch data from Supabase
     const { data: products, error } = await supabaseClient
-        .from('tabel_produk') // Your Supabase table name
+        .from('tabel_produk')
         .select('*');
 
     if (error) {
@@ -22,94 +22,94 @@ document.addEventListener('DOMContentLoaded', async function () {
         updateSummaryCards(products);
         updateProvinceChart(products);
         updateMonthlySalesChart(products);
+        updateTopAndLeastProducts(products);
         updateCategoryChart(products);
         updateShippingChart(products);
         updatePaymentChart(products);
-         updateTopAndLeastProducts(products);
     }
 
     function updateTopAndLeastProducts(products) {
-    const productSales = {};
-    
-    // Calculate sales for each product
-    products.forEach(product => {
-        if (!productSales[product.nama_produk]) {
-            productSales[product.nama_produk] = {
-                name: product.nama_produk,
-                category: product.kategori,
-                quantity: 0,
-                revenue: 0
-            };
-        }
-        productSales[product.nama_produk].quantity += parseInt(product.kuantitas);
-        productSales[product.nama_produk].revenue += parseFloat(product.harga) * parseInt(product.kuantitas);
-    });
+        const productSales = {};
+        
+        // Calculate sales for each product
+        products.forEach(product => {
+            if (!productSales[product.nama_produk]) {
+                productSales[product.nama_produk] = {
+                    name: product.nama_produk,
+                    quantity: 0
+                };
+            }
+            productSales[product.nama_produk].quantity += parseInt(product.kuantitas);
+        });
 
-    // Convert to array and sort by quantity only
-    const productArray = Object.values(productSales);
-    const sortedByQuantity = [...productArray].sort((a, b) => b.quantity - a.quantity);
+        // Convert to array and sort by quantity
+        const productArray = Object.values(productSales);
+        const sortedByQuantity = [...productArray].sort((a, b) => b.quantity - a.quantity);
 
-    // Get top and least 3 products by quantity
-    const topProductsByQuantity = sortedByQuantity.slice(0, 3);
-    const leastProductsByQuantity = sortedByQuantity.slice(-3).reverse();
+        // Get top and least 3 products by quantity
+        const topProductsByQuantity = sortedByQuantity.slice(0, 3);
+        const leastProductsByQuantity = sortedByQuantity.slice(-3).reverse();
 
-    // Create HTML for the cards (quantity only)
-    const topProductsHTML = createProductTableHTML('Produk Terlaris', topProductsByQuantity, 'quantity');
-    const leastProductsHTML = createProductTableHTML('Produk Kurang Diminati', leastProductsByQuantity, 'quantity');
+        // Create pie charts
+        createProductPieChart('topProductsChart', 'Produk Terlaris', topProductsByQuantity);
+        createProductPieChart('leastProductsChart', 'Produk Kurang Diminati', leastProductsByQuantity);
+    }
 
-    // Create a new card container
-    const newCard = document.createElement('div');
-    newCard.className = 'card full-width-card';
-    newCard.innerHTML = `
-        <div class="card-header">
-            <div class="card-title">Performa Produk</div>
-        </div>
-        <div class="product-performance-container">
-            ${topProductsHTML}
-            ${leastProductsHTML}
-        </div>
-    `;
-    
-    // Find the container where we want to insert the new card
-    const mainContent = document.querySelector('.main-content .page.active');
-    
-    // Create a new card-container div for our card
-    const newCardContainer = document.createElement('div');
-    newCardContainer.className = 'card-container';
-    newCardContainer.appendChild(newCard);
-    
-    // Insert after the monthly sales chart container
-    const monthlySalesContainer = document.querySelector('.card-container:nth-of-type(3)');
-    monthlySalesContainer.parentNode.insertBefore(newCardContainer, monthlySalesContainer.nextSibling);
-}
+    function createProductPieChart(canvasId, title, products) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        
+        // Prepare data for the chart
+        const labels = products.map(product => product.name);
+        const data = products.map(product => product.quantity);
+        
+        // Generate distinct colors for each product
+        const backgroundColors = [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)'
+        ];
+        
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: title,
+                        font: {
+                            size: 14
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw} unit`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-    // Helper function to create HTML for product tables
-    function createProductTableHTML(title, products, type) {
-    return `
-        <div class="product-performance-table">
-            <h4>${title}</h4>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th>Kategori</th>
-                        <th>Kuantitas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${products.map(product => `
-                        <tr>
-                            <td>${product.name}</td>
-                            <td>${product.category}</td>
-                            <td>${product.quantity}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
+    // ... (keep all the other existing functions unchanged) ...
     function updateSummaryCards(products) {
         const totalProducts = products.reduce((sum, product) => sum + parseInt(product.kuantitas), 0);
         const totalRevenue = products.reduce((sum, product) => sum + (parseFloat(product.harga) * parseInt(product.kuantitas)), 0);
@@ -343,4 +343,3 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 });
-
